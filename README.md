@@ -20,7 +20,20 @@ Simple Pool for Mongodb-Erlang
 ```
 
 ###Usage
-Shortcut:
+Available shortcuts
+`find_one/3`
+`find_one/4`
+`find_one/5`
+`insert/3`
+`update/4`
+`update/5`
+`update/6`
+`delete/3`
+`delete_one/3`
+`count/3`
+`count/4`
+`command/2`
+`ensure_index/3`
 ```erlang
 mongodb_pool:insert(PoolName, Collection, [
                                             {name, <<"Yankees">>, home, {city, <<"New York">>, state, <<"NY">>}, league, <<"American">>},
