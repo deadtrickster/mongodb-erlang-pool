@@ -1,0 +1,12 @@
+{application, mongodb_pool,
+ [
+  {description, "Simple MongoDB Connections Pool"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { mongodb_pool_app, []}},
+  {env, []}
+ ]}.
