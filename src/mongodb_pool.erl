@@ -2,7 +2,7 @@
 
 %% Include
 -include_lib("eunit/include/eunit.hrl").
--include("deps/mongodb/include/mongo_protocol.hrl").
+-include_lib("mongodb/include/mongo_protocol.hrl").
 
 %% API
 -export([start/0, stop/0]).
@@ -10,11 +10,11 @@
 -export([
          find_one/3,
          find_one/4,
-         find_one/5,
+         find/3,
+         find/4,
          insert/3,
          update/4,
          update/5,
-         update/6,
          delete/3,
          delete_one/3
         ]).
@@ -57,82 +57,83 @@ delete_pool(PoolName) ->
 
 %% @doc Insert a document or multiple documents into a collection.
 %%      Returns the document or documents with an auto-generated _id if missing.
--spec insert(term(), collection(), A) -> A.
+-spec insert(term(), mongo:collection(), A) -> A.
 insert(PoolName, Coll, Docs) ->
   do(PoolName, fun(Connection) ->
-                            mongo:insert(Connection, Coll, Docs)
-                        end).
+                   mongo:insert(Connection, Coll, Docs)
+               end).
 
 %% @doc Replace the document matching criteria entirely with the new Document.
--spec update(term(), collection(), selector(), bson:document()) -> ok.
+-spec update(term(), mongo:collection(), mongo:selector(), bson:document()) -> ok.
 update(PoolName, Coll, Selector, Doc) ->
   do(PoolName, fun(Connection) ->
-                            mongo:update(Connection, Coll, Selector, Doc)
-                        end).
+                   mongo:update(Connection, Coll, Selector, Doc)
+               end).
 
 %% @doc Replace the document matching criteria entirely with the new Document.
--spec update(term(), collection(), selector(), bson:document(), boolean()) -> ok.
-update(PoolName, Coll, Selector, Doc, Upsert) ->
+-spec update(term(), mongo:collection(), mongo:selector(), bson:document(), proplists:proplist()) -> ok.
+update(PoolName, Coll, Selector, Doc, Args) ->
   do(PoolName, fun(Connection) ->
-                            mongo:update(Connection, Coll, Selector, Doc, Upsert)
-                        end).
-
-%% @doc Replace the document matching criteria entirely with the new Document.
--spec update(term(), collection(), selector(), bson:document(), boolean(), boolean()) -> ok.
-update(PoolName, Coll, Selector, Doc, Upsert, MultiUpdate) ->
-  do(PoolName, fun(Connection) ->
-                            mongo:update(Connection, Coll, Selector, Doc, Upsert, MultiUpdate)
-                        end).
+                   mongo:update(Connection, Coll, Selector, Doc, Args)
+               end).
 
 %% @doc Delete selected documents
--spec delete(term(), collection(), selector()) -> ok.
+-spec delete(term(), mongo:collection(), mongo:selector()) -> ok.
 delete(PoolName, Coll, Selector) ->
   do(PoolName, fun(Connection) ->
-                            mongo:delete(Connection, Coll, Selector)
-                        end).
+                   mongo:delete(Connection, Coll, Selector)
+               end).
 
 %% @doc Delete first selected document.
--spec delete_one(term(), collection(), selector()) -> ok.
+-spec delete_one(term(), mongo:collection(), mongo:selector()) -> ok.
 delete_one(PoolName, Coll, Selector) ->
   do(PoolName, fun(Connection) ->
-                            mongo:delete_one(Connection, Coll, Selector)
-                        end).
+                   mongo:delete_one(Connection, Coll, Selector)
+               end).
 
 %% @doc Return first selected document, if any
--spec find_one(term(), collection(), selector()) -> {} | {bson:document()}.
+-spec find_one(term(), mongo:collection(), mongo:selector()) -> {} | {bson:document()}.
 find_one(PoolName, Coll, Selector) ->
   do(PoolName, fun(Connection) ->
-                            mongo:find_one(Connection, Coll, Selector)
-                        end).
+                   mongo:find_one(Connection, Coll, Selector)
+               end).
 
 %% @doc Return projection of first selected document, if any. Empty projection [] means full projection.
--spec find_one(term(), collection(), selector(), projector()) -> {} | {bson:document()}.
-find_one(PoolName, Coll, Selector, Projector) ->
+-spec find_one(term(), mongo:collection(), mongo:selector(), proplists:proplist()) -> {} | {bson:document()}.
+find_one(PoolName, Coll, Selector, Args) ->
   do(PoolName, fun(Connection) ->
-                            mongo:find_one(Connection, Coll, Selector, Projector)
-                        end).
+                   mongo:find_one(Connection, Coll, Selector, Args)
+               end).
 
-%% @doc Return projection of Nth selected document, if any. Empty projection [] means full projection.
--spec find_one(term(), collection(), selector(), projector(), skip()) -> {} | {bson:document()}.
-find_one(PoolName, Coll, Selector, Projector, Skip) ->
+%% @doc Return selected documents.
+-spec find(term(), mongo:collection(), mongo:selector()) -> mongo:cursor().
+find(PoolName, Coll, Selector) ->
   do(PoolName, fun(Connection) ->
-                            mongo:find_one(Connection, Coll, Selector, Projector, Skip)
-                        end).
+                   mongo:find(Connection, Coll, Selector)
+               end).
 
-%@doc Count selected documents
--spec count(term(), collection(), selector()) -> integer().
+%% @doc Return projection of selected documents.
+%%      Empty projection [] means full projection.
+-spec find(term(), mongo:collection(), mongo:selector(), proplists:proplist()) -> mongo:cursor().
+find(PoolName, Coll, Selector, Args) ->
+  do(PoolName, fun(Connection) ->
+                   mongo:find(Connection, Coll, Selector, Args)
+               end).
+
+                                                %@doc Count selected documents
+-spec count(term(), mongo:collection(), mongo:selector()) -> integer().
 count(PoolName, Coll, Selector) ->
   do(PoolName, fun(Connection) ->
-                            mongo:count(Connection, Coll, Selector)
-                        end).
+                   mongo:count(Connection, Coll, Selector)
+               end).
 
-%@doc Count selected documents up to given max number; 0 means no max.
-%     Ie. stops counting when max is reached to save processing time.
--spec count(term(), collection(), selector(), integer()) -> integer().
-count(PoolName, Coll, Selector, Limit) -> 
+                                                %@doc Count selected documents up to given max number; 0 means no max.
+                                                %     Ie. stops counting when max is reached to save processing time.
+-spec count(term(), mongo:collection(), mongo:selector(), integer()) -> integer().
+count(PoolName, Coll, Selector, Limit) ->
   do(PoolName, fun(Connection) ->
-                            mongo:count(Connection, Coll, Selector, Limit)
-                        end).
+                   mongo:count(Connection, Coll, Selector, Limit)
+               end).
 
 %% @doc Create index on collection according to given spec.
 %%      The key specification is a bson documents with the following fields:
@@ -140,20 +141,19 @@ count(PoolName, Coll, Selector, Limit) ->
 %%      name     :: bson:utf8()
 %%      unique   :: boolean()
 %%      dropDups :: boolean()
--spec ensure_index(term(), collection(), bson:document()) -> ok.
-ensure_index(PoolName, Coll, IndexSpec) ->  
+-spec ensure_index(term(), mongo:collection(), bson:document()) -> ok.
+ensure_index(PoolName, Coll, IndexSpec) ->
   do(PoolName, fun(Connection) ->
-                            mongo:ensure_index(Connection, Coll, IndexSpec)
-                        end).
+                   mongo:ensure_index(Connection, Coll, IndexSpec)
+               end).
 
 %% @doc Execute given MongoDB command and return its result.
 -spec command(term(), bson:document()) -> {boolean(), bson:document()}. % Action
 command(PoolName, Command) ->
   do(PoolName, fun(Connection) ->
-                            mongo:command(Connection, Command)
-                        end).
+                   mongo:command(Connection, Command)
+               end).
 
--spec do(term(), action(A)) -> A.
-
+-spec do(term(), mongo:action(A)) -> A.
 do(PoolName, Fun) ->
   poolboy:transaction(PoolName, Fun).
