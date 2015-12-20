@@ -23,11 +23,11 @@ Simple Pool for Mongodb-Erlang
 Available shortcuts
 `find_one/3`
 `find_one/4`
-`find_one/5`
+`find/3`
+`find/4`
 `insert/3`
 `update/4`
 `update/5`
-`update/6`
 `delete/3`
 `delete_one/3`
 `count/3`
