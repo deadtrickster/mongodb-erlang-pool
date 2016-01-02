@@ -42,10 +42,10 @@ start() ->
 stop() ->
   application:stop(?MODULE).
 
--spec(create_pool(GlobalOrLocal::atom(), PoolName::atom(), Size::integer(), Options::[tuple()]) ->
+-spec(create_pool(GlobalOrLocal::atom(), PoolName::atom(), Size::tuple(), Options::[tuple()]) ->
          {ok, pid()} | {error,{already_started, pid()}}).
 
-create_pool(GlobalOrLocal, Size, PoolName, Options) ->
+create_pool(GlobalOrLocal, PoolName, Size, Options) ->
   mongodb_pool_sup:create_pool(GlobalOrLocal, Size, PoolName, Options).
 
 -spec(delete_pool(PoolName::atom()) -> ok | {error,not_found}).
