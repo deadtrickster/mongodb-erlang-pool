@@ -52,9 +52,8 @@ create_pool(GlobalOrLocal, PoolName, Size, Options)
   when GlobalOrLocal =:= local;
        GlobalOrLocal =:= global ->
 
-    SizeArgs = [{size, Size}, {max_overflow, 10}],
     PoolArgs = [{name, {GlobalOrLocal, PoolName}}, {worker_module, mc_worker}],
-    PoolSpec = poolboy:child_spec(PoolName, PoolArgs ++ SizeArgs, Options),
+    PoolSpec = poolboy:child_spec(PoolName, PoolArgs ++ Size, Options),
 
     supervisor:start_child(?MODULE, PoolSpec).
 
